@@ -5,6 +5,9 @@ import cv2
 import time
 import imutils
 import dlib
+import math as mt
+import numpy as np
+import matplotlib.pyplot as plt
 
 DLIB_5_MODEL_PATH="models/shape_predictor_5_face_landmarks.dat"
 
@@ -46,6 +49,115 @@ def capture_face():
     return cropped_face
 
 
+def gen_emp_face(emp_name):
+    vs=VideoStream(src=0, framerate=50).start()
+    time.sleep(2.0)
+    face_found=False
+    cropped_face=None
+    correct_image=None
+    while True:
+        frame=vs.read()
+        fram=imutils.resize(frame, width=400)
+        gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        rects=detector(gray, 0)
+
+        if len(rects)==0:
+            text="No face found.\n Please adjust lighting and remove spectacles"
+            cv2.putText(frame, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
+        elif len(rects)>1:
+            text="{} face(s) found. Please be single in the frame.".format(len(rects))
+            cv2.putText(frame, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
+        elif len(rects)==1:
+            text="Face detected"
+            cv2.putText(frame, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            rect=rects[0]
+            correct_image=correct_orientation(frame, rect)
+            break
+            (bx, by, bw, bh)=face_utils.rect_to_bb(rect)
+            cv2.rectangle(frame, (bx, by), (bx+bw, by+bh), (0, 255, 0), 1)
+            print(rect)
+            shape=predictor(gray, rect)
+            shape=face_utils.shape_to_np(shape)
+            face_points=[]
+            for(i, (x, y)) in enumerate(shape):
+                cv2.circle(frame, (x, y), 1, (0, 0, 255), -1)
+                cv2.putText(frame, str(i+1), (x-10, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+                face_points.append((x, y))
+            
+            eye1_cen=((face_points[0][0]+face_points[1][0])//2 , (face_points[0][1]+face_points[1][1])//2)
+            eye2_cen=((face_points[2][0]+face_points[3][0])//2 , (face_points[2][1]+face_points[3][1])//2)
+            cv2.circle(frame, eye1_cen, 1, (0, 255, 0), -1)
+            cv2.circle(frame, eye2_cen, 1, (0, 255, 0), -1)
+
+            angle=slope(eye1_cen, eye2_cen)
+            cv2.putText(frame, str(angle), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+
+        cv2.imshow("Frame", frame)
+        key=cv2.waitKey(1) & 0xFF
+        if key==ord("q"):
+            break
+    
+    cv2.destroyAllWindows()
+    vs.stop()
+    return correct_image
+
+def slope(t1, t2):
+    diff_x=abs(t2[0]-t1[0])
+    diff_y=abs(t2[1]-t1[1])
+    if diff_x==0:
+        return 90
+    elif diff_y==0:
+        return 0
+    slope=mt.atan(diff_y/diff_x)
+    angle=mt.degrees(slope)
+    angle=round(angle, 2)
+    return angle
+
+def correct_orientation(image, rect):
+    gray=cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    shape=predictor(gray, rect)
+    shape=face_utils.shape_to_np(shape)
+
+    left_eye=shape[0:2]
+    right_eye=shape[2:4]
+
+    left_eye_cen=left_eye.mean(axis=0).astype(int)
+    right_eye_cen=right_eye.mean(axis=0).astype(int)
+
+    dy=right_eye_cen[1]-left_eye_cen[1]
+    dx=right_eye_cen[0]-left_eye_cen[0]
+    angle=np.degrees(np.arctan2(dy,dx))-180
+
+    desired_left_eye=(0.35, 0.35)
+    desired_face_width=256
+    desired_face_height=256
+
+    desired_right_eyex=1.0-desired_left_eye[0]
+    dist=np.sqrt((dx**2)+(dy**2))
+    desired_dist=(desired_right_eyex-desired_left_eye[0])
+    desired_dist*=desired_face_width
+    scale=desired_dist/dist
+
+    eyes_cen=((left_eye_cen[0]+right_eye_cen[0])//2, (left_eye_cen[1]+right_eye_cen[1])//2)
+    M=cv2.getRotationMatrix2D(eyes_cen, angle, scale)
+    tx=desired_face_width*0.5
+    ty=desired_face_height*desired_left_eye[1]
+    M[0,2]+=(tx-eyes_cen[0])
+    M[1, 2]+=(ty-eyes_cen[1])
+    
+    output=cv2.warpAffine(image, M, (desired_face_width, desired_face_height), flags=cv2.INTER_CUBIC)
+    return output
+
+
+# img=gen_emp_face("Random") 
+# print(img.shape)
+# plt.figure()
+# plt.imshow(img)
+# plt.show()
 # img=capture_face()
 
 
