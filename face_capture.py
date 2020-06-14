@@ -51,7 +51,7 @@ def capture_face():
 
 def gen_emp_face(emp_name):
     vs=VideoStream(src=0, framerate=50).start()
-    time.sleep(2.0)
+    time.sleep(3.0)
     face_found=False
     cropped_face=None
     correct_image=None
@@ -62,13 +62,13 @@ def gen_emp_face(emp_name):
         frame=imutils.resize(frame, width=400)
         frame=cv2.flip(frame, 1)
         frame_orig=frame.copy()
-        draw_map(frame)
+        draw_map(frame, count)
         gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         rects=detector(gray, 0)
 
         if len(rects)==0:
-            text="No face found.\n Please adjust lighting and remove spectacles"
+            text="No face found"
             cv2.putText(frame, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
         elif len(rects)>1:
@@ -106,7 +106,7 @@ def gen_emp_face(emp_name):
                 cv2.imwrite("dataset/faces/lalit/"+str(count)+".jpg", adjusted)              
                 count+=1
             elif not inside:
-                cv2.putText(frame, "Be inside the grid", (200, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                cv2.putText(frame, "Be inside the grid", (150, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
         if count>25:
             cv2.putText(frame, "Done, Press q", (200, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
@@ -165,13 +165,17 @@ def correct_orientation(image, rect):
     output=cv2.warpAffine(image, M, (desired_face_width, desired_face_height), flags=cv2.INTER_CUBIC)
     return output
 
-def draw_map(frame):
+def draw_map(frame, count):
     cv2.ellipse(frame, (200, 135), (90, 120), 0, 0, 360, (255, 255, 255), 1)
     cv2.ellipse(frame, (200, 135), (90, 90), 0, 0, 360, (255, 255, 255), 1)
     cv2.ellipse(frame, (200, 135), (90, 30), 0, 0, 360, (255, 255, 255), 1)
     cv2.ellipse(frame, (200, 135), (60, 120), 0, 0, 360, (255, 255, 255), 1)
     cv2.ellipse(frame, (200, 135), (30, 120), 0, 0, 360, (255, 255, 255), 1)
-
+    
+    ### Progress bar
+    cv2.putText(frame, "Progress Bar", (10, 285), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+    cv2.rectangle(frame, (10, 290), (390, 295), (0, 255, 0), 1)
+    cv2.rectangle(frame, (10, 290), (count*15, 295), (0, 255, 0), -1)
     return 
 
 gen_emp_face("Random") 
