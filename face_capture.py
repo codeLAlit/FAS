@@ -55,9 +55,14 @@ def gen_emp_face(emp_name):
     face_found=False
     cropped_face=None
     correct_image=None
+    time_prev=time.time()
+    count=0
     while True:
         frame=vs.read()
-        fram=imutils.resize(frame, width=400)
+        frame=imutils.resize(frame, width=400)
+        frame=cv2.flip(frame, 1)
+        frame_orig=frame.copy()
+        draw_map(frame)
         gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         rects=detector(gray, 0)
@@ -74,36 +79,44 @@ def gen_emp_face(emp_name):
             text="Face detected"
             cv2.putText(frame, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             rect=rects[0]
-            correct_image=correct_orientation(frame, rect)
-            break
+
             (bx, by, bw, bh)=face_utils.rect_to_bb(rect)
             cv2.rectangle(frame, (bx, by), (bx+bw, by+bh), (0, 255, 0), 1)
-            print(rect)
             shape=predictor(gray, rect)
             shape=face_utils.shape_to_np(shape)
             face_points=[]
+            inside=True
             for(i, (x, y)) in enumerate(shape):
                 cv2.circle(frame, (x, y), 1, (0, 0, 255), -1)
-                cv2.putText(frame, str(i+1), (x-10, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
                 face_points.append((x, y))
+                if x>270 or x<110 or y<30 or y>135 and i!=4:
+                    inside=False
             
             eye1_cen=((face_points[0][0]+face_points[1][0])//2 , (face_points[0][1]+face_points[1][1])//2)
             eye2_cen=((face_points[2][0]+face_points[3][0])//2 , (face_points[2][1]+face_points[3][1])//2)
-            cv2.circle(frame, eye1_cen, 1, (0, 255, 0), -1)
-            cv2.circle(frame, eye2_cen, 1, (0, 255, 0), -1)
-
             angle=slope(eye1_cen, eye2_cen)
             cv2.putText(frame, str(angle), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            
+            # print(time_prev-time.time())
+            if time.time()-time_prev>1 and count<=25 and inside:
+                time_capture=time.time()
+                time_prev=time_capture
+                print(count)
+                adjusted=correct_orientation(frame_orig, rect)
+                cv2.imwrite("dataset/faces/lalit/"+str(count)+".jpg", adjusted)              
+                count+=1
+            elif not inside:
+                cv2.putText(frame, "Be inside the grid", (200, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-
+        if count>25:
+            cv2.putText(frame, "Done, Press q", (200, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
         cv2.imshow("Frame", frame)
         key=cv2.waitKey(1) & 0xFF
         if key==ord("q"):
             break
-    
+
     cv2.destroyAllWindows()
     vs.stop()
-    return correct_image
 
 def slope(t1, t2):
     diff_x=abs(t2[0]-t1[0])
@@ -152,8 +165,16 @@ def correct_orientation(image, rect):
     output=cv2.warpAffine(image, M, (desired_face_width, desired_face_height), flags=cv2.INTER_CUBIC)
     return output
 
+def draw_map(frame):
+    cv2.ellipse(frame, (200, 135), (90, 120), 0, 0, 360, (255, 255, 255), 1)
+    cv2.ellipse(frame, (200, 135), (90, 90), 0, 0, 360, (255, 255, 255), 1)
+    cv2.ellipse(frame, (200, 135), (90, 30), 0, 0, 360, (255, 255, 255), 1)
+    cv2.ellipse(frame, (200, 135), (60, 120), 0, 0, 360, (255, 255, 255), 1)
+    cv2.ellipse(frame, (200, 135), (30, 120), 0, 0, 360, (255, 255, 255), 1)
 
-# img=gen_emp_face("Random") 
+    return 
+
+gen_emp_face("Random") 
 # print(img.shape)
 # plt.figure()
 # plt.imshow(img)
