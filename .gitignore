@@ -1,2 +1,5 @@
 *.dat
 dataset/faces/*
+dataset/encodings/*
+! dataset/encodings/ranodm*
+__pycache__/*

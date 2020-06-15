@@ -24,7 +24,7 @@ def capture_face():
     cropped_face=None
     while True:
         frame=vs.read()
-        fram=imutils.resize(frame, width=400)
+        frame=imutils.resize(frame, width=400)
         gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         rects=detector(gray, 0)
@@ -187,7 +187,7 @@ def draw_map(frame, count):
     cv2.rectangle(frame, (10, 290), (10+count*15, 295), (0, 255, 0), -1)
     return 
 
-gen_emp_face("lalit") 
+# gen_emp_face("lalit") 
 # print(img.shape)
 # plt.figure()
 # plt.imshow(img)
