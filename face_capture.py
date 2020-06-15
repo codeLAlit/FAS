@@ -8,11 +8,14 @@ import dlib
 import math as mt
 import numpy as np
 import matplotlib.pyplot as plt
+import shutil
 
 DLIB_5_MODEL_PATH="models/shape_predictor_5_face_landmarks.dat"
+FACES_PARENT="dataset/faces/"
 
 detector=dlib.get_frontal_face_detector()
 predictor=dlib.shape_predictor(DLIB_5_MODEL_PATH)
+predictor_align=dlib.shape_predictor(DLIB_5_MODEL_PATH)
 
 def capture_face():
     vs=VideoStream(src=0, framerate=50).start()
@@ -50,15 +53,20 @@ def capture_face():
 
 
 def gen_emp_face(emp_name):
-    vs=VideoStream(src=0, framerate=50).start()
+    vs=cv2.VideoCapture(0)
     time.sleep(3.0)
     face_found=False
     cropped_face=None
     correct_image=None
     time_prev=time.time()
     count=0
+
+    if os.path.exists(FACES_PARENT+emp_name):
+        shutil.rmtree(FACES_PARENT+emp_name)
+    os.mkdir(FACES_PARENT+emp_name)
+
     while True:
-        frame=vs.read()
+        __, frame=vs.read()
         frame=imutils.resize(frame, width=400)
         frame=cv2.flip(frame, 1)
         frame_orig=frame.copy()
@@ -101,9 +109,8 @@ def gen_emp_face(emp_name):
             if time.time()-time_prev>1 and count<=25 and inside:
                 time_capture=time.time()
                 time_prev=time_capture
-                print(count)
                 adjusted=correct_orientation(frame_orig, rect)
-                cv2.imwrite("dataset/faces/lalit/"+str(count)+".jpg", adjusted)              
+                cv2.imwrite(FACES_PARENT+emp_name+"/"+str(count)+".jpg", adjusted)              
                 count+=1
             elif not inside:
                 cv2.putText(frame, "Be inside the grid", (150, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
@@ -115,8 +122,10 @@ def gen_emp_face(emp_name):
         if key==ord("q"):
             break
 
+    vs.release()
     cv2.destroyAllWindows()
-    vs.stop()
+    
+    return
 
 def slope(t1, t2):
     diff_x=abs(t2[0]-t1[0])
@@ -132,7 +141,7 @@ def slope(t1, t2):
 
 def correct_orientation(image, rect):
     gray=cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    shape=predictor(gray, rect)
+    shape=predictor_align(gray, rect)
     shape=face_utils.shape_to_np(shape)
 
     left_eye=shape[0:2]
@@ -175,10 +184,10 @@ def draw_map(frame, count):
     ### Progress bar
     cv2.putText(frame, "Progress Bar", (10, 285), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
     cv2.rectangle(frame, (10, 290), (390, 295), (0, 255, 0), 1)
-    cv2.rectangle(frame, (10, 290), (count*15, 295), (0, 255, 0), -1)
+    cv2.rectangle(frame, (10, 290), (10+count*15, 295), (0, 255, 0), -1)
     return 
 
-gen_emp_face("Random") 
+gen_emp_face("lalit") 
 # print(img.shape)
 # plt.figure()
 # plt.imshow(img)
