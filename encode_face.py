@@ -42,10 +42,8 @@ def gen_emp_data(image_directory, emp_name, encode_dir, is_cnn=True):
         
         boxes = face_recognition.face_locations(image_rgb, model=model)
         encodings=face_recognition.face_encodings(image_rgb, boxes)
-        print(len(boxes))
         for encoding in encodings:
             emp_encodings.append(encoding)
-            print(len(encoding))
     
     if os.path.exists(image_directory):
         shutil.rmtree(image_directory)

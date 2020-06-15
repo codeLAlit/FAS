@@ -18,9 +18,6 @@ def ismatched(available_encoding, given_encoding, thresh=0.6):
 
 def find_emp():
     image=capture_face()
-    plt.figure()
-    plt.imshow(image)
-    plt.show()
     encoded_image=encode_image(image)
     match_list=[]
     for encoded_file in os.listdir(ENCODINGS_DIR):
