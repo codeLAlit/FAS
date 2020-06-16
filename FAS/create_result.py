@@ -4,8 +4,8 @@ import imutils
 import face_recognition
 import dlib
 import numpy as np
-from face_capture import capture_face
-from encode_face import encode_image
+from .face_capture import capture_face
+from .encode_face import encode_image
 import matplotlib.pyplot as plt
 
 
@@ -20,6 +20,8 @@ def ismatched(available_encoding, given_encoding, thresh=0.6):
 def find_emp():
     image=capture_face()
     encoded_image=encode_image(image)
+    if len(encoded_image)==0:
+        return "Invalid Image", -1
     match_list=[]
     for encoded_file in os.listdir(ENCODINGS_DIR):
         matches=0

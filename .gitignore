@@ -1,5 +1,5 @@
 *.dat
-dataset/faces/*
-dataset/encodings/*
-! dataset/encodings/ranodm*
-__pycache__/*
+FAS/dataset/faces/*
+FAS/dataset/encodings/*
+! FAS/dataset/encodings/ranodm*
+FAS/__pycache__/*

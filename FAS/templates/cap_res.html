@@ -13,12 +13,12 @@
 <h2> Proceed to create the face encoding</h2>
 <form action="/fas_home/create_emp/cap_res/" method="post">
     {% csrf_token %}
-    <input id="id_emp_name" type="hidden" name="emp_name" value={{name}}>
+    <input id="id_emp_name" type="hidden" name="emp_name" value={{name}} method="POST">
     <input type="submit" value="Start Encoding">
 </form>
 {% else %}
 <h2> Please Recapture the face</h2>
-<form action="/fas_home/create_emp/" method="post">
+<form action="/fas_home/create_emp/" method="POST">
     {% csrf_token %}
     <input type="submit" value="Recapture">
 </form>

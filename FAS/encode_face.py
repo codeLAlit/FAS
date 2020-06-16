@@ -46,8 +46,8 @@ def gen_emp_data(image_directory, emp_name, encode_dir, is_cnn=True):
             for encoding in encodings:
                 emp_encodings.append(encoding)
         
-        # if os.path.exists(image_directory):
-        #     shutil.rmtree(image_directory)
+        if os.path.exists(image_directory):
+            shutil.rmtree(image_directory)
 
         encodings=np.asarray(emp_encodings)
         file_name=encode_dir+emp_name+"_face_encodings.npy"

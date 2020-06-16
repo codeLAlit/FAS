@@ -8,11 +8,11 @@ from django.dispatch import receiver
 class Employee(models.Model):
     emp_name=models.CharField(max_length=100, default="")
     emp_code=models.CharField(max_length=8, default="", unique=True)
-    emp_photo=models.BooleanField()
-    emp_encoding=models.BooleanField()
+    emp_photo=models.BooleanField(default=False)
+    emp_encoding=models.BooleanField(default=False)
     
     def __str__ (self):
-        return emp_code
+        return self.emp_code
 
 class Record(models.Model):
     emp_name=models.CharField(max_length=100, default="")
@@ -22,4 +22,4 @@ class Record(models.Model):
     attendance_time=models.TimeField()
     remark=models.CharField(max_length=100, default="None")
     def __str__ (self):
-        return emp_code
+        return self.emp_code
