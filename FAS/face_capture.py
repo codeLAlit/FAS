@@ -10,8 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import shutil
 
-DLIB_5_MODEL_PATH="models/shape_predictor_5_face_landmarks.dat"
-FACES_PARENT="dataset/faces/"
+DLIB_5_MODEL_PATH="FAS/models/shape_predictor_5_face_landmarks.dat"
+FACES_PARENT="FAS/dataset/faces/"
 
 detector=dlib.get_frontal_face_detector()
 predictor=dlib.shape_predictor(DLIB_5_MODEL_PATH)
@@ -122,10 +122,12 @@ def gen_emp_face(emp_name):
         if key==ord("q"):
             break
 
+    if count<25 :
+        return False
     vs.release()
     cv2.destroyAllWindows()
     
-    return
+    return True
 
 def slope(t1, t2):
     diff_x=abs(t2[0]-t1[0])

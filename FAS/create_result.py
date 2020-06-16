@@ -8,7 +8,8 @@ from face_capture import capture_face
 from encode_face import encode_image
 import matplotlib.pyplot as plt
 
-ENCODINGS_DIR="dataset/encodings/"
+
+ENCODINGS_DIR="FAS/dataset/encodings/"
 
 def ismatched(available_encoding, given_encoding, thresh=0.6):
     match=np.linalg.norm(available_encoding-given_encoding, axis=1)
@@ -41,5 +42,3 @@ def find_emp():
 
     return name, max_match
 
-name, matches=find_emp()
-print(name, matches)

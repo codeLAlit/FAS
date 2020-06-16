@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+    <ul>
+        <li><a href="/fas_home/create_emp/">Add Employee</a></li>
+        <li><a href="#">Check Attendance Record</a></li>
+        <li><a href="/fas_home/start_stop/">{% if live %}Stop{% else %} Start {% endif %}</a></li>
+    </ul>
+{% endblock %}
