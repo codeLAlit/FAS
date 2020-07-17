@@ -3,3 +3,5 @@ FAS/dataset/faces/*
 FAS/dataset/encodings/*
 ! FAS/dataset/encodings/ranodm*
 FAS/__pycache__/*
+db.sqlite3
+! FAS/dataset/univ_data.json
